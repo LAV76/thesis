@@ -248,3 +248,40 @@ def check_if_signal(symbol):
                 signal='short'
 
     return signal
+
+# telegrams functionality
+
+def getTPSLfrom_telegram():
+    strr='https://api.telegram.org/bot'+bot_token+'/getUpdates'
+    response = requests.get(strr)
+    rs=response.json()
+    if(len(rs['result'])>0):
+        rs2=rs['result'][-1]
+        rs3=rs2['message']
+        textt=rs3['text']
+        datet=rs3['date']
+
+        if(time.time()-datet)<telegram_delay:
+            if 'quit' in textt:
+                quit()
+            if 'exit' in textt:
+                exit()
+            if 'info' in textt:
+                ar = get_opened_positions(symbol)
+                telegram_bot_sendtext(str(f'{ar[0]} {ar[1]} Профит:{ar[2]} Плече:{ar[3]} Баланс:{ar[4]} Цена вх:{ar[5]}'))    
+            if 'close_pos' in textt:
+                position=get_opened_positions(symbol)
+                open_sl=position[0]
+                quantity=position[1]
+                close_position(symbol,open_sl,abs(quantity))
+            
+def telegram_bot_sendtext(bot_message):
+    send_text = 'https://api.telegram.org/bot' + bot_token + '/sendMessage?chat_id=' + chat_id + '&parse_mode=Markdown&text=' + bot_message
+    response = requests.get(send_text)
+    return response.json()
+            
+
+# отправка сообщения в телеграм и терминал
+def prt(message):
+    telegram_bot_sendtext(pointer+': '+message)
+    print(pointer+': '+message)
