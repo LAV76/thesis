@@ -285,3 +285,67 @@ def telegram_bot_sendtext(bot_message):
 def prt(message):
     telegram_bot_sendtext(pointer+': '+message)
     print(pointer+': '+message)
+
+
+def main(step):
+    global proffit_array
+
+    try:
+        getTPSLfrom_telegram()
+        position=get_opened_positions(symbol)
+        open_sl=position[0]
+        if open_sl=="": # нет открытых позиций
+            prt('Нет открытых позиций')
+            # закрываем все ордера
+            check_and_close_orders(symbol)
+            signal=check_if_signal(symbol)
+            proffit_array=copy.copy(eth_proffit_array)
+
+            if signal=='long':
+                open_position(symbol,'long',maxposition)
+
+            elif signal=='short':
+                open_position(symbol,'short',maxposition)
+        else:
+
+            entry_price=position[5] # цена входа
+            current_price=get_symbol_price(symbol)
+            quantity=position[1]
+
+            prt('Найдена открытая позиция '+open_sl)
+            prt('Кол-во: '+str(quantity))
+
+            if open_sl=='long':
+                stop_price=entry_price*(1-stop_percent)
+                if current_price<stop_price:
+                    # закрываем по стопу
+                    close_position(symbol,'long',abs(quantity))
+                    proffit_array=copy.copy(eth_proffit_array)
+                else:
+                    temp_arr=copy.copy(proffit_array)
+                    for j in range(0,len(temp_arr)-1):
+                        delta=temp_arr[j][0]
+                        contracts=temp_arr[j][1]
+                        if(current_price>(entry_price+delta)):
+                        # закрываем чать позиций
+                            close_position(symbol,'long',abs(round(maxposition*(contracts/10),3)))
+                            del proffit_array[0]
+
+            if open_sl=='short':
+                stop_price=entry_price*(1+stop_percent)
+                if current_price>stop_price:
+                    # закрываем по стопу
+                    close_position(symbol,'short',abs(quantity))
+                    proffit_array=copy.copy(eth_proffit_array)
+                else:
+                    temp_arr=copy.copy(proffit_array)
+                    for j in range(0,len(temp_arr)-1):
+                        delta=temp_arr[j][0]
+                        contracts=temp_arr[j][1]
+                        if(current_price<(entry_price-delta)):
+                        # закрываем чать позиций
+                            close_position(symbol,'short',abs(round(maxposition*(contracts/10),3)))
+                            del proffit_array[0]
+      
+    except :
+        prt('\n\nВнимание ошибка, скрипт продолжает работу')    
