@@ -11,17 +11,17 @@ from binance import Client, ThreadedWebsocketManager, ThreadedDepthCacheManager
 from binance_py import send_signed_request, send_public_request
 from ENV import KEY, SECRET, TOKEN, ID
 
-symbol='BNBUSDT'
+symbol = 'BNBUSDT'
 client = Client(KEY, SECRET)
 
-maxposition=0.03
-stop_percent=0.01 # 0.01=1%
-eth_proffit_array=[[20,1],[40,1],[60,2],[80,2],[100,2],[150,1],[200,1],[200,0]]
-proffit_array=copy.copy(eth_proffit_array)
-telegram_delay=12
-bot_token=TOKEN
-chat_id=ID
-pointer=str(random.randint(1000, 9999))
+maxposition = 0.03
+stop_percent = 0.01 # 0.01=1%
+eth_proffit_array = [[20,1],[40,1],[60,2],[80,2],[100,2],[150,1],[200,1],[200,0]]
+proffit_array = copy.copy(eth_proffit_array)
+telegram_delay = 12
+bot_token = TOKEN
+chat_id = ID
+pointer = str(random.randint(1000, 9999))
 
 # последние 500 свечей за 5 минут дл Symbol
 
@@ -56,7 +56,6 @@ def open_position(symbol,s_l,quantity_l):
             ]
         }
         responce = send_signed_request('POST', '/fapi/v1/batchOrders', params)
-        #print(responce)
        
        
     if(s_l=='short'):
@@ -148,6 +147,7 @@ def get_symbol_price(symbol):
 
 
 # Индикаторы
+
 
 # поиск линии цены
 def indSlope(series,n):
@@ -249,7 +249,7 @@ def check_if_signal(symbol):
 
     return signal
 
-# telegrams functionality
+    
 
 def getTPSLfrom_telegram():
     strr='https://api.telegram.org/bot'+bot_token+'/getUpdates'
@@ -274,6 +274,8 @@ def getTPSLfrom_telegram():
                 open_sl=position[0]
                 quantity=position[1]
                 close_position(symbol,open_sl,abs(quantity))
+ 
+ 
             
 def telegram_bot_sendtext(bot_message):
     send_text = 'https://api.telegram.org/bot' + bot_token + '/sendMessage?chat_id=' + chat_id + '&parse_mode=Markdown&text=' + bot_message
@@ -285,7 +287,7 @@ def telegram_bot_sendtext(bot_message):
 def prt(message):
     telegram_bot_sendtext(pointer+': '+message)
     print(pointer+': '+message)
-
+    
 
 def main(step):
     global proffit_array
@@ -348,4 +350,4 @@ def main(step):
                             del proffit_array[0]
       
     except :
-        prt('\n\nВнимание ошибка, скрипт продолжает работу')    
+        prt('\n\nВнимание ошибка, скрипт продолжает работу')
